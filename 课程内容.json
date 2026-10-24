@@ -1,0 +1,168 @@
+{
+  "title": "项目: Agent基础设施建设",
+  "author": "袁进",
+  "description": "",
+  "playerPath": "AI大全栈 / AI / 项目: Agent基础设施建设",
+  "resourceUrl": "https://gitee.com/dev-edu/ai-infrastructure",
+  "skills": [
+    "Docker Compose",
+    "LiteLLM",
+    "网关自部署",
+    "兼容性问题的最佳实践",
+    "大模型凭据管理",
+    "模型分组",
+    "模型映射",
+    "Deployement",
+    "会话粘黏",
+    "路由负载均衡策略",
+    "熔断机制",
+    "回退机制",
+    "多级回退",
+    "并发控制",
+    "模型并发",
+    "网关并发",
+    "Logging Callback",
+    "AI资产注册与治理",
+    "Agent配置清单",
+    "Nacos API 接口",
+    "集成AgentSpec",
+    "通用缓存函数",
+    "Agent动态配置",
+    "开源沙箱方案",
+    "OpenSandbox",
+    "自定义沙箱镜像",
+    "Nacos自定义配置",
+    "实现沙箱后端",
+    "Agent接入沙箱后端",
+    "搭建MinIO环境",
+    "实现minio管理",
+    "沙箱直传MinIO",
+    "沙箱产物自动部署",
+    "沙箱共享卷",
+    "连接技能到Agent"
+  ],
+  "type": "录播",
+  "status": "已上架",
+  "catalog": [
+    {
+      "title": "必看导言",
+      "showIndex": true
+    },
+    {
+      "title": "认识docker-compose",
+      "showIndex": true
+    },
+    {
+      "title": "恢复langfuse服务",
+      "showIndex": true
+    },
+    {
+      "title": "AI网关服务选型",
+      "showIndex": true
+    },
+    {
+      "title": "兼容性问题的最佳实践",
+      "showIndex": true
+    },
+    {
+      "title": "网关访问链路",
+      "showIndex": true
+    },
+    {
+      "title": "会话粘黏",
+      "showIndex": true
+    },
+    {
+      "title": "路由策略",
+      "showIndex": true
+    },
+    {
+      "title": "熔断",
+      "showIndex": true
+    },
+    {
+      "title": "回退机制",
+      "showIndex": true
+    },
+    {
+      "title": "并发控制",
+      "showIndex": true
+    },
+    {
+      "title": "Logging Callback",
+      "showIndex": true
+    },
+    {
+      "title": "AI资产注册与治理",
+      "showIndex": true
+    },
+    {
+      "title": "AgentSpec",
+      "showIndex": true
+    },
+    {
+      "title": "Nacos API 接口",
+      "showIndex": true
+    },
+    {
+      "title": "集成AgentSpec",
+      "showIndex": true
+    },
+    {
+      "title": "Agent动态配置",
+      "showIndex": true
+    },
+    {
+      "title": "开源沙箱方案",
+      "showIndex": true
+    },
+    {
+      "title": "自定义沙箱镜像",
+      "showIndex": true
+    },
+    {
+      "title": "Nacos自定义配置",
+      "showIndex": true
+    },
+    {
+      "title": "创建和复用沙箱",
+      "showIndex": true
+    },
+    {
+      "title": "实现沙箱后端",
+      "showIndex": true
+    },
+    {
+      "title": "Agent接入沙箱后端",
+      "showIndex": true
+    },
+    {
+      "title": "搭建MinIO环境",
+      "showIndex": true
+    },
+    {
+      "title": "实现minio管理",
+      "showIndex": true
+    },
+    {
+      "title": "沙箱直传MinIO",
+      "showIndex": true
+    },
+    {
+      "title": "沙箱产物自动部署",
+      "showIndex": true
+    },
+    {
+      "title": "沙箱共享卷",
+      "showIndex": true
+    },
+    {
+      "title": "连接技能到Agent",
+      "showIndex": true
+    },
+    {
+      "title": "课程总结",
+      "showIndex": true
+    }
+  ]
+}
