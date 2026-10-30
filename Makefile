@@ -1,6 +1,6 @@
 DS ?= all
 
-.PHONY: docker-recreate build dev debug course course-push test-benchmark test-units test-integrations
+.PHONY: docker-recreate build dev debug course course-push test-benchmark test-units test-integrations block-tree-mock
 
 docker-recreate:
 	docker compose up -d --force-recreate
@@ -25,6 +25,9 @@ test-units:
 
 test-integrations:
 	MINIO_INTEGRATION=1 DEPLOY_INTEGRATION=1 DEPLOY_SANDBOX_IMAGE=opensandbox-python-node:1.0 uv run pytest -q tests/intergrations
+
+block-tree-mock:
+	uv run python scripts/generate_block_tree_mock.py
 
 course-push:
 	@[ -n "$(SHA)" ] || (echo "请提供提交 hash: make course-push SHA=<hash>" && exit 1)
