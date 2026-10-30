@@ -10,19 +10,12 @@ from pydantic import JsonValue
 
 from deal_pilot.rag.structure.feishu_doc.block_node import BlockNode, block_node_to_dict
 from deal_pilot.rag.structure.feishu_doc.block_type import BlockType
-from deal_pilot.rag.structure.feishu_doc.process_image_blocks import process_image_blocks
+from deal_pilot.rag.structure.feishu_doc.process_image_blocks import process_image_block
 
 _METADATA_KEYS = frozenset({"block_id", "block_type", "parent_id", "children"})
 
 
-def build_block_tree(
-    blocks: list[dict[str, JsonValue]] | dict[str, JsonValue],
-) -> BlockNode:
-    """同步构树；不含图片后处理。请优先使用 ``build_block_tree_async``。"""
-    return _build_block_tree(blocks)
-
-
-async def build_block_tree_async(
+async def build_block_tree(
     blocks: list[dict[str, JsonValue]] | dict[str, JsonValue],
 ) -> BlockNode:
     """把飞书 list_blocks 返回的扁平块列表构造成以页面块为根的 BlockNode 树。
@@ -37,10 +30,11 @@ async def build_block_tree_async(
     节点 ``content`` 从块体提取：富文本块拼接 ``text_run``；图片块为 ``image.token``。
     ``payload`` 现阶段表格块写入 ``column_size``、``row_size``、``merge_info``，代码块写入
     ``language``，其余类型留空供后续扩展。
-    构树完成后调用 ``process_image_blocks``（当前为占位）。
+    构树完成后 ``await _apply_heading_outline(root)``：整理标题大纲，并在根上
+    完成一次先序遍历处理全部图片块。
     """
     root = _build_block_tree(blocks)
-    await process_image_blocks(root)
+    await _apply_heading_outline(root)
     return root
 
 
@@ -86,9 +80,7 @@ def _build_block_tree(
     if not roots:
         raise ValueError("未找到根块（parent_id 为空）")
     if len(roots) == 1:
-        root = nodes[roots[0]]
-        _apply_heading_outline(root)
-        return root
+        return nodes[roots[0]]
 
     page_roots = [
         root_id
@@ -96,9 +88,7 @@ def _build_block_tree(
         if nodes[root_id].block_type == int(BlockType.PAGE)
     ]
     if len(page_roots) == 1:
-        root = nodes[page_roots[0]]
-        _apply_heading_outline(root)
-        return root
+        return nodes[page_roots[0]]
     raise ValueError(f"存在多个根块: {roots}")
 
 
@@ -110,12 +100,17 @@ def _heading_level(node: BlockNode) -> int | None:
     return value - int(BlockType.HEADING1) + 1
 
 
-def _apply_heading_outline(node: BlockNode) -> None:
-    """按文档顺序把同级块按标题层级挂成大纲树（如二级标题挂到一级下）。"""
+async def _apply_heading_outline(node: BlockNode) -> None:
+    """按文档顺序把同级块按标题层级挂成大纲树（如二级标题挂到一级下）。
+
+    在页面根节点上完成大纲整理后，同一次调用内按先序 ``await process_image_block``。
+    """
     for child in list(node.children):
-        _apply_heading_outline(child)
+        await _apply_heading_outline(child)
 
     if not node.children:
+        if node.parent is None:
+            await _process_image_blocks_preorder(node)
         return
 
     ordered = list(node.children)
@@ -135,6 +130,16 @@ def _apply_heading_outline(node: BlockNode) -> None:
         else:
             parent = stack[-1][0] if stack else node
             parent.append(child)
+
+    if node.parent is None:
+        await _process_image_blocks_preorder(node)
+
+
+async def _process_image_blocks_preorder(node: BlockNode) -> None:
+    if node.block_type == int(BlockType.IMAGE):
+        await process_image_block(node)
+    for child in node.children:
+        await _process_image_blocks_preorder(child)
 
 
 def _coerce_block_items(
@@ -286,50 +291,17 @@ def _extract_node_fields(
     return resolved_type, "".join(parts), payload
 
 
-def export_block_tree_json(
+async def export_block_tree_json(
     output_path: Path | str,
     blocks: list[dict[str, JsonValue]] | dict[str, JsonValue],
 ) -> BlockNode:
-    """同步导出；不含图片后处理。请优先使用 ``export_block_tree_json_async``。"""
-    root = build_block_tree(blocks)
+    """构树（含按序图片处理）并写入 JSON；顶层为 ``block_node_to_dict(root)``，勿手改输出文件。"""
+    root = await build_block_tree(blocks)
     _write_block_tree_json(output_path, root)
     return root
 
 
-async def export_block_tree_json_async(
-    output_path: Path | str,
-    blocks: list[dict[str, JsonValue]] | dict[str, JsonValue],
-) -> BlockNode:
-    """构树（含图片处理占位）并写入 JSON；顶层为 ``block_node_to_dict(root)``，勿手改输出文件。"""
-    root = await build_block_tree_async(blocks)
-    _write_block_tree_json(output_path, root)
-    return root
-
-
-def _write_block_tree_json(output_path: Path | str, root: BlockNode) -> None:
-    path = Path(output_path)
-    path.write_text(
-        json.dumps(block_node_to_dict(root), ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
-
-def export_block_tree_json_from_mock(
-    mock_path: Path | str = "resource/list_blocks_mock.json",
-    output_path: Path | str = "block_tree_from_mock.json",
-    *,
-    input_key: str = "list_blocks_result",
-) -> BlockNode:
-    """同步从 mock 生成 JSON；不含图片后处理。请优先使用 ``export_block_tree_json_from_mock_async``。"""
-    mock_file = Path(mock_path)
-    document = json.loads(mock_file.read_text(encoding="utf-8"))
-    blocks = document.get(input_key)
-    if not isinstance(blocks, list):
-        raise ValueError(f"{mock_file} 中缺少数组字段 {input_key!r}")
-    return export_block_tree_json(output_path, blocks)
-
-
-async def export_block_tree_json_from_mock_async(
+async def export_block_tree_json_from_mock(
     mock_path: Path | str = "resource/list_blocks_mock.json",
     output_path: Path | str = "block_tree_from_mock.json",
     *,
@@ -341,4 +313,12 @@ async def export_block_tree_json_from_mock_async(
     blocks = document.get(input_key)
     if not isinstance(blocks, list):
         raise ValueError(f"{mock_file} 中缺少数组字段 {input_key!r}")
-    return await export_block_tree_json_async(output_path, blocks)
+    return await export_block_tree_json(output_path, blocks)
+
+
+def _write_block_tree_json(output_path: Path | str, root: BlockNode) -> None:
+    path = Path(output_path)
+    path.write_text(
+        json.dumps(block_node_to_dict(root), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )

@@ -431,6 +431,25 @@ async def test_default_metadata_and_new_strategy_only_affects_future_uploads(min
 
 
 @live_test
+async def test_upload_bytes_uses_explicit_mime_and_filename_cache(minio_env):
+    bucket = await minio_env.private_bucket()
+    client = minio_env.client(
+        cache_strategy=[CacheStrategy([".png"], max_age=3600)],
+        content_type_strategy=ContentTypeStrategy(extensions={".png": "image/png"}),
+    )
+    await client.upload_bytes(
+        bucket_name=bucket,
+        filename="assets/logo.png",
+        data=b"binary",
+        mime="image/jpeg",
+    )
+    head = await minio_env.raw.head_object(Bucket=bucket, Key="assets/logo.png")
+    assert head["ContentType"] == "image/jpeg"
+    assert head["CacheControl"] == "max-age=3600"
+    assert await minio_env.get(bucket, "assets/logo.png") == b"binary"
+
+
+@live_test
 async def test_list_files_all_pages_sorted_and_string_prefixes(minio_env):
     bucket = await minio_env.private_bucket()
     semaphore = asyncio.Semaphore(20)
@@ -603,6 +622,7 @@ async def test_invalid_object_keys_do_not_write_or_delete_data(minio_env, tmp_pa
     calls = {
         "write_file": {"stream": BytesIO(b"data")},
         "upload_file": {"source_file": str(source)},
+        "upload_bytes": {"data": b"data", "mime": "application/octet-stream"},
         "download_file": {"target_file": str(tmp_path / "target")},
         "read_file": {}, "file_exists": {}, "remove_file": {},
         "presigned_get_file_url": {}, "presigned_put_file_url": {},

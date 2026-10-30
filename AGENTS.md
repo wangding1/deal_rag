@@ -26,6 +26,7 @@
 | `src/deal_pilot/agents` | Agent 工厂、主 Agent 状态、子 Agent 组装 |
 | `src/deal_pilot/app` | FastAPI 自定义路由、Langfuse Webhook |
 | `src/deal_pilot/config` | 环境配置；`nacos` 子目录负责远程资源读取与同步 |
+| `src/deal_pilot/feishu` | 图片等 HTTP 下载辅助（当前按 URL，不经飞书 API） |
 | `src/deal_pilot/security` | LangGraph 身份认证与资源授权 |
 | `src/deal_pilot/backends` | Deep Agents 后端到 OpenSandbox 的适配 |
 | `src/deal_pilot/tools` | 模型可调用的工具及注册表 |

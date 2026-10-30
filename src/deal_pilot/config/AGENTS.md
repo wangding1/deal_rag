@@ -4,7 +4,7 @@
 
 - `base_settings.py:BaseSettingsWithEnv` 从 `.env` 和进程环境读取配置，忽略额外字段。
 - 各 `*_settings.py` 定义并实例化服务连接配置；`nacos` 子目录读取与组装远程行为资源，详细规则见其指令文件。
-- Settings 负责地址和凭据等运行配置；AgentSpec、Prompt、Skill、MCP 及 `sandbox_config` 由 Nacos 提供，不混淆两层职责。
+- Settings 负责地址和凭据等运行配置；AgentSpec、Prompt、Skill、MCP 及通用 YAML（`sandbox_config`、`rag_config`）由 Nacos 提供，不混淆两层职责。
 
 ## 配置契约
 

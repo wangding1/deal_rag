@@ -6,12 +6,12 @@ from __future__ import annotations
 import asyncio
 
 from deal_pilot.rag.structure.feishu_doc.build_block_tree import (
-    export_block_tree_json_from_mock_async,
+    export_block_tree_json_from_mock,
 )
 
 
 async def _main() -> None:
-    root = await export_block_tree_json_from_mock_async()
+    root = await export_block_tree_json_from_mock()
     print("Wrote block_tree_from_mock.json from resource/list_blocks_mock.json")
     print(f"  root: {root.block_id}  direct_children: {len(root.children)}")
 

@@ -8,7 +8,7 @@
 
 ## 关键契约
 
-- 所有资源使用 `nacos_settings.namespace_id`。AgentSpec、Prompt、Skill 查询当前使用 `production` label；通用配置使用 `deal_pilot` group，当前 `ConfigName` 只支持 `sandbox_config`。
+- 所有资源使用 `nacos_settings.namespace_id`。AgentSpec、Prompt、Skill 查询当前使用 `production` label；通用配置使用 `deal_pilot` group，当前 `ConfigName` 支持 `sandbox_config` 与 `rag_config`（RAG 行为配置，如 `image_parser`）。
 - AgentSpec 的 content 是 JSON；通用配置 content 是 YAML，使用 `yaml.safe_load` 后通过 Pydantic 校验，不将两种格式互换。
 - 系统指令来自资源 `instruction_{agent_name}/AGENTS__MD`，再拼接 `link_prompts`。这份远程指令服务于运行时 Agent，与仓库开发用 `AGENTS.md` 是不同内容，不自动上传仓库指令。
 - MCP 当前取 `backendEndpoints` 的第一个端点；工具元数据中的 `enabled=false` 转为禁用列表。修改选端逻辑时同步工厂的工具名前缀规则。

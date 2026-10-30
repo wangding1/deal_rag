@@ -44,7 +44,7 @@
 - 对象键移除前导 `/`，不解析 `..` 或合并中间斜线；S3 对象键与本地文件路径不同，不能直接套用 Deploy 的路径限制。
 - `upload_dir` 保留相对路径，跳过符号链接及非普通文件，扫描完成才开始上传，单文件错误汇总并继续；不删除额外远程对象，已上传内容不回滚。
 - `UploadDirResult.failures` 使用相对源目录的路径；保持 `total_count=success_count+failure_count` 和 `failure_count=len(failures)`。Deploy 再将失败路径转换为沙箱绝对路径。
-- 缓存及 Content-Type 策略按目标对象键匹配，只影响新上传。永久 URL 不代表私有对象可匿名读取；预签名 URL 不预检查对象存在或改变桶权限。
+- 缓存及 Content-Type 策略按目标对象键匹配，只影响新上传；`upload_bytes` 的 Content-Type 由参数 `mime` 指定。永久 URL 不代表私有对象可匿名读取；预签名 URL 不预检查对象存在或改变桶权限。
 - 桶强制删除必须处理对象版本和删除标记；不要通过忽略服务端错误把清理报告为成功。
 
 ## 验签、清理与验证

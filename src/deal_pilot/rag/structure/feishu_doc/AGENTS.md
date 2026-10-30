@@ -8,13 +8,13 @@
 | --- | --- |
 | `block_node.py` | 树节点类型、兄弟/父子关系、`block_node_to_dict` |
 | `block_type.py` / `code_language.py` | 飞书枚举常量 |
-| `build_block_tree.py` | 构树、导出 JSON；入口为 **`build_block_tree_async`** |
-| `process_image_blocks.py` | 构树后异步处理图片块（当前占位） |
+| `build_block_tree.py` | 构树、按序调用图片处理、导出 JSON |
+| `process_image_blocks.py` | **单张**图片块处理；含 Data URL、MinIO 上传与兄弟上下文 |
 
 ## 调用顺序
 
-1. `await build_block_tree_async(blocks)` — 同步构树逻辑 + `await process_image_blocks(root)`
-2. 生成 `block_tree_from_mock.json`：`make block-tree-mock`（内部 `export_block_tree_json_from_mock_async`）
+1. `root = await build_block_tree(blocks)` — 挂链后单次 `await _apply_heading_outline(root)`（大纲 + 图片先序）
+2. 生成 `block_tree_from_mock.json`：`make block-tree-mock`
 
 ## 验证
 
@@ -22,4 +22,4 @@
 make block-tree-mock
 ```
 
-图片处理实现后，在同一 async 流程中扩展 `process_image_blocks._process_image_node`，勿在脚本里手改 JSON。
+扩展图片逻辑时改 `process_image_block`，勿在脚本里手改 JSON。

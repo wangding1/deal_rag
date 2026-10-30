@@ -110,6 +110,7 @@ class ContentTypeStrategy:
 
     write_file、upload_file 和 upload_dir 均按目标对象键最后一段的最后一个后缀匹配，
     例如 archive.tar.gz 匹配 .gz；映射优先于默认值。
+    upload_bytes 的 Content-Type 由参数 mime 指定，不参与上述映射。
     不根据本地文件名、文件内容或系统 MIME 配置自动推断类型。
     """
 
@@ -435,6 +436,30 @@ class MinIO:
                 await client.put_object(
                     Bucket=bucket_name, Key=filename, Body=body, **self._metadata(filename),
                 )
+
+    async def upload_bytes(
+        self,
+        *,
+        bucket_name: str,
+        filename: str,
+        data: bytes,
+        mime: str,
+    ) -> None:
+        """上传内存中的字节；覆盖和缓存约定与 upload_file 相同。
+
+        data 为完整对象内容，允许为零字节。
+        Content-Type 使用参数 mime，不使用 content_type_strategy。
+        Cache-Control 仍由 cache_strategy 按 filename 决定。
+        """
+        bucket_name, filename = _bucket(bucket_name), _key(filename)
+        if type(data) is not bytes:
+            raise ValueError("data 必须是 bytes")
+        metadata = self._metadata(filename)
+        metadata["ContentType"] = _content_type(mime)
+        async with self._client() as client:
+            await client.put_object(
+                Bucket=bucket_name, Key=filename, Body=data, **metadata,
+            )
 
     @staticmethod
     def _local_path(value: str) -> str:

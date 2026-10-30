@@ -32,3 +32,12 @@ class OpenSandboxConfig(BaseModel):
     timeout_seconds: int = Field(default=600, gt=0)
     ready_timeout_seconds: int = Field(default=180, gt=0)
     command_timeout_seconds: int = Field(default=90, gt=0)
+
+
+class ImageParserConfig(BaseModel):
+    bucket_name: str = Field(default="feishu-images", min_length=1)
+    sibling_count: int = Field(default=3, ge=0)
+
+
+class RagConfig(BaseModel):
+    image_parser: ImageParserConfig = Field(default_factory=ImageParserConfig)
